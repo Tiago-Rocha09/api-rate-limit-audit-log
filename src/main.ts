@@ -1,7 +1,14 @@
+import 'dotenv/config'
 import { buildApp } from './infra/fastify/app'
+import { connectRedis } from './infra/redis/client'
 
-const app = buildApp()
+async function bootstrap() {
+  await connectRedis()
 
-app.listen({ port: 3000 }, () => {
-  console.log('Server running on http://localhost:3000')
-})
+  const app = buildApp()
+
+  await app.listen({ port: 3000 })
+  console.log('🚀 Server running on http://localhost:3000')
+}
+
+bootstrap()

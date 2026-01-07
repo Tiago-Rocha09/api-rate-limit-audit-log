@@ -5,19 +5,24 @@ import { RateLimitPolicy } from '../../rate-limit/RateLimitPolicy'
 import { RateLimitExceededError } from '../../rate-limit/errors'
 
 import { RegisterAuditLog } from '../../audit/RegisterAuditLog'
-import { InMemoryRateLimitRepository } from '../../../tests/helpers/InMemoryRateLimitRepository'
 import { InMemoryAuditLogRepository } from '../../../tests/helpers/InMemoryAuditLogRepository'
+import { RedisRateLimitRepository } from '../redis/RedisRateLimitRepository'
+import { RedisAuditLogRepository } from '../redis/RedisAuditLogRepository'
+import { RateLimitRepository } from '../../rate-limit/RateLimitRepository'
 
 type BuildAppOptions = {
   auditLogRepository?: InMemoryAuditLogRepository
+  rateLimitRepository?: RateLimitRepository
 }
 
 export function buildApp(options?: BuildAppOptions) {
   const app = Fastify()
 
-  const rateLimitRepository = new InMemoryRateLimitRepository()
+  const rateLimitRepository =
+    options?.rateLimitRepository ?? new RedisRateLimitRepository()
+
   const auditLogRepository =
-    options?.auditLogRepository ?? new InMemoryAuditLogRepository()
+    options?.auditLogRepository ?? new RedisAuditLogRepository()
 
   const rateLimitChecker = new RateLimitChecker(rateLimitRepository)
   const registerAuditLog = new RegisterAuditLog(auditLogRepository)

@@ -1,9 +1,13 @@
 import request from 'supertest'
 import { buildApp } from '../../src/infra/fastify/app'
+import { InMemoryRateLimitRepository } from '../helpers/InMemoryRateLimitRepository'
 
 describe('Rate limit integration', () => {
   it('should return 429 when rate limit is exceeded', async () => {
-    const app = buildApp()
+    const rateLimitRepository = new InMemoryRateLimitRepository()
+    const app = buildApp({
+      rateLimitRepository,
+    })
 
     await app.ready()
 
