@@ -1,0 +1,62 @@
+import Fastify from 'fastify'
+
+import { RateLimitChecker } from '../../rate-limit/RateLimitChecker'
+import { RateLimitPolicy } from '../../rate-limit/RateLimitPolicy'
+import { RateLimitExceededError } from '../../rate-limit/errors'
+
+import { RegisterAuditLog } from '../../audit/RegisterAuditLog'
+import { InMemoryRateLimitRepository } from '../../../tests/helpers/InMemoryRateLimitRepository'
+import { InMemoryAuditLogRepository } from '../../../tests/helpers/InMemoryAuditLogRepository'
+
+export function buildApp() {
+  const app = Fastify()
+
+  const rateLimitRepository = new InMemoryRateLimitRepository()
+  const auditLogRepository = new InMemoryAuditLogRepository()
+
+  const rateLimitChecker = new RateLimitChecker(rateLimitRepository)
+  const registerAuditLog = new RegisterAuditLog(auditLogRepository)
+
+  const policy: RateLimitPolicy = {
+    maxRequests: 3,
+  }
+
+  app.addHook('onRequest', async (request, reply) => {
+    const key = `ip:${request.ip}`
+
+    try {
+      await rateLimitChecker.check(policy, key)
+    } catch (error) {
+      if (error instanceof RateLimitExceededError) {
+        reply.status(429).send({
+          message: 'Too many requests',
+        })
+        return
+      }
+
+      throw error
+    }
+  })
+
+  app.addHook('onResponse', async (request, reply) => {
+    const route =
+    request.routeOptions.url ??
+    request.raw.url ??
+    'unknown'
+
+    await registerAuditLog.execute({
+      action: request.method,
+      actorId: 'anonymous',
+      ip: request.ip,
+      route,
+      method: request.method,
+      status: reply.statusCode,
+    })
+  })
+
+  app.get('/health', async () => {
+    return { status: 'ok' }
+  })
+
+  return app
+}
