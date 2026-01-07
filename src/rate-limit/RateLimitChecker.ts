@@ -1,14 +1,19 @@
-import { RateLimitExceededError } from './errors'
-import { RateLimitRepository } from './RateLimitRepository'
 import { RateLimitPolicy } from './RateLimitPolicy'
+import { RateLimitRepository } from './RateLimitRepository'
+import { RateLimitExceededError } from './errors'
 
 export class RateLimitChecker {
-  constructor(private repository: RateLimitRepository) {}
+  constructor(
+    private readonly repository: RateLimitRepository
+  ) {}
 
   async check(policy: RateLimitPolicy, key: string): Promise<void> {
-    const currentCount = await this.repository.increment(key)
+    const current = await this.repository.increment(
+      key,
+      policy.windowInSeconds
+    )
 
-    if (currentCount > policy.maxRequests) {
+    if (current > policy.maxRequests) {
       throw new RateLimitExceededError()
     }
   }

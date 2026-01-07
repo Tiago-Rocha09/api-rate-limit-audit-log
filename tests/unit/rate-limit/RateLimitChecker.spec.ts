@@ -8,7 +8,8 @@ describe("RateLimitChecker", () => {
         const checker = new RateLimitChecker(repository);
 
         const policy = {
-            maxRequests: 3
+            maxRequests: 3,
+            windowInSeconds: 60,
         }
 
         await expect(checker.check(policy, "user1")).resolves.not.toThrow();
@@ -21,7 +22,8 @@ describe("RateLimitChecker", () => {
         const checker = new RateLimitChecker(repository);
 
         const policy = {
-            maxRequests: 3
+            maxRequests: 3,
+            windowInSeconds: 60,
         }
 
         await expect(checker.check(policy, "user1")).resolves.not.toThrow();

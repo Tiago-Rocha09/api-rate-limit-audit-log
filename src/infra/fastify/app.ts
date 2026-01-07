@@ -29,6 +29,7 @@ export function buildApp(options?: BuildAppOptions) {
 
   const policy: RateLimitPolicy = {
     maxRequests: 3,
+    windowInSeconds: 20,
   }
 
   app.addHook('onRequest', async (request, reply) => {

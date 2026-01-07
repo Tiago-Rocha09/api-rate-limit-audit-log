@@ -1,15 +1,25 @@
+type Entry = {
+  count: number
+  expiresAt: number
+}
+
 export class InMemoryRateLimitRepository {
-  private counters: Map<string, number>
+  private store = new Map<string, Entry>()
 
-  constructor() {
-    this.counters = new Map()
-  }
+  async increment(
+    key: string,
+    windowInSeconds: number
+  ): Promise<number> {
+    const now = Date.now()
+    const entry = this.store.get(key)
 
-  async increment(key: string): Promise<number> {
-    const current = this.counters.get(key) ?? 0
-    const next = current + 1
+    if (!entry || entry.expiresAt < now) {
+      const expiresAt = now + windowInSeconds * 1000
+      this.store.set(key, { count: 1, expiresAt })
+      return 1
+    }
 
-    this.counters.set(key, next)
-    return next
+    entry.count += 1
+    return entry.count
   }
 }

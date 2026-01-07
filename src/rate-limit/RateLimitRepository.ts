@@ -1,3 +1,6 @@
 export interface RateLimitRepository {
-  increment(key: string): Promise<number>
+  increment(
+    key: string,
+    windowInSeconds: number
+  ): Promise<number>
 }
