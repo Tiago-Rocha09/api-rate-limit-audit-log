@@ -1,6 +1,6 @@
-import { RateLimitChecker } from "../../src/rate-limit/RateLimitChecker";
-import { RateLimitExceededError } from "../../src/rate-limit/errors";
-import { InMemoryRateLimitRepository } from "../helpers/InMemoryRateLimitRepository";
+import { RateLimitChecker } from "../../../src/rate-limit/RateLimitChecker";
+import { RateLimitExceededError } from "../../../src/rate-limit/errors";
+import { InMemoryRateLimitRepository } from "../../helpers/InMemoryRateLimitRepository";
 
 describe("RateLimitChecker", () => {
     it("should allow requests until the limit is reached", async () => {

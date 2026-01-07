@@ -1,5 +1,5 @@
-import { RegisterAuditLog } from '../../src/audit/RegisterAuditLog'
-import { InMemoryAuditLogRepository } from '../helpers/InMemoryAuditLogRepository'
+import { RegisterAuditLog } from '../../../src/audit/RegisterAuditLog'
+import { InMemoryAuditLogRepository } from '../../helpers/InMemoryAuditLogRepository'
 
 describe('RegisterAuditLog', () => {
   it('should register an audit log with correct data', async () => {
