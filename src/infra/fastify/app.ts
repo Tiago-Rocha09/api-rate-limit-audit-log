@@ -8,11 +8,16 @@ import { RegisterAuditLog } from '../../audit/RegisterAuditLog'
 import { InMemoryRateLimitRepository } from '../../../tests/helpers/InMemoryRateLimitRepository'
 import { InMemoryAuditLogRepository } from '../../../tests/helpers/InMemoryAuditLogRepository'
 
-export function buildApp() {
+type BuildAppOptions = {
+  auditLogRepository?: InMemoryAuditLogRepository
+}
+
+export function buildApp(options?: BuildAppOptions) {
   const app = Fastify()
 
   const rateLimitRepository = new InMemoryRateLimitRepository()
-  const auditLogRepository = new InMemoryAuditLogRepository()
+  const auditLogRepository =
+    options?.auditLogRepository ?? new InMemoryAuditLogRepository()
 
   const rateLimitChecker = new RateLimitChecker(rateLimitRepository)
   const registerAuditLog = new RegisterAuditLog(auditLogRepository)
@@ -28,21 +33,18 @@ export function buildApp() {
       await rateLimitChecker.check(policy, key)
     } catch (error) {
       if (error instanceof RateLimitExceededError) {
-        reply.status(429).send({
-          message: 'Too many requests',
-        })
+        reply.status(429).send({ message: 'Too many requests' })
         return
       }
-
       throw error
     }
   })
 
   app.addHook('onResponse', async (request, reply) => {
     const route =
-    request.routeOptions.url ??
-    request.raw.url ??
-    'unknown'
+      request.routeOptions.url ??
+      request.raw.url ??
+      'unknown'
 
     await registerAuditLog.execute({
       action: request.method,
