@@ -25,7 +25,9 @@ Tudo foi desenvolvido seguindo **Test-Driven Development (TDD)**.
 src/
  ├── rate-limit/     # regra de rate limit
  ├── audit/          # regra de audit log
- └── infra/fastify/  # camada HTTP
+ └── infra
+        └── fastify/  # camada HTTP
+        └── redis/    # camada de persistência
 
 tests/
  ├── unit/           # testes de domínio
