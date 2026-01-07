@@ -1,0 +1,19 @@
+version: '3.9'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: redis-api-rate-limit
+    ports:
+      - "6379:6379"
+    command: >
+      redis-server
+      --requirepass ${REDIS_PASSWORD}
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+volumes:
+  redis-data:
